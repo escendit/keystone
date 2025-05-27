@@ -60,11 +60,11 @@ jobs:
 
       # .NET Restore
       - name: .NET Restore
-        run: dotnet restore ${{ steps.project }}
+        run: dotnet restore ${{ inputs.project }}
 
       # .NET Build
       - name: .NET Build
-        run: dotnet build ${{ steps.project }} --no-restore --configuration Release
+        run: dotnet build ${{ inputs.project }} --no-restore --configuration Release
 
       # .NET Test
       - name: .NET Test
