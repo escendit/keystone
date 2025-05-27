@@ -1,0 +1,199 @@
+name: Package
+
+on:
+  workflow_call:
+    inputs:
+      # Build
+      build:
+        required: false
+        type: boolean
+        default: true
+        description: Build a solution
+      # Project
+      project:
+        required: true
+        type: string
+        description: Path to a project (.csproj)
+      # Test
+      test:
+        required: false
+        type: boolean
+        default: true
+        description: Test a solution
+      # Pack
+      pack:
+        required: false
+        type: boolean
+        default: true
+        description: Create a package
+      # Publish to GitHub
+      github-publish:
+        required: false
+        type: boolean
+        default: true
+        description: Publish the package to GitHub Registry
+      # Publish to NuGet.org Public Registry
+      nuget-publish:
+        required: false
+        type: boolean
+        default: false
+        description: Publish the package to NuGet.org Public Registry
+
+jobs:
+  # Build
+  build:
+    if: inputs.build
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # .NET Setup
+      - name: .NET Setup
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+
+      # .NET Restore
+      - name: .NET Restore
+        run: dotnet restore ${{ steps.project }}
+
+      # .NET Build
+      - name: .NET Build
+        run: dotnet build ${{ steps.project }} --no-restore --configuration Release
+
+      # .NET Test
+      - name: .NET Test
+        if: inputs.test
+        run: |
+          dotnet test \
+            --nologo \
+            --collect "XPlat Code Coverage" \
+            --test-adapter-path . \
+            --logger "junit;LogFileName={assembly}-{framework}-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose" \
+            --results-directory test-results
+
+      # .NET Test Upload Test Results from Testing
+      - name: .NET Test Upload
+        if: inputs.test
+        uses: actions/upload-artifact@v4
+        with:
+          name: test
+          path: |
+            test-results/
+            !test-results/**/coverage.cobertura.xml
+
+      # .NET Covergage Upload Results from Testing
+      - name: .NET Coverage Upload
+        if: inputs.test
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            test-results/**/coverage.cobertura.xml
+
+      # .NET Pack
+      - name: .NET Pack
+        if: ${{ inputs.pack && github.event_name == 'release'  && github.ref_type == 'tag' || github.event.release.tag_name }}
+        run: dotnet pack --no-build --configuration Release --output packages/
+
+      # .NET Upload NuGet Artifact
+      - name: .NET Upload NuGet Artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ github.event_name == 'release'  && github.ref_type == 'tag' || github.event.release.tag_name }}
+        with:
+          name: nuget
+          path: packages/
+  # .NET Test Reporting
+  test-report:
+    # .NET Test Report
+    name: .NET Test Report
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # .NET Test Download Artifact
+      - name: .NET Test Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test
+
+      # .NET Test Generate Test Result Report(s)
+      - name: .NET Test Generate Test Result Report(s)
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          comment_mode: ""
+          files: |
+            **/*.xml
+
+  # .NET Coverage Reporting
+  coverage-report:
+    # .NET Coverage Report
+    name: .NET Coverage Report
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # .NET Coverage Download Artifact
+      - name: .NET Coverage Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+
+      # .NET Coverage Summary Report
+      - name: .NET Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: "**/coverage.cobertura.xml"
+          badge: true
+          format: "markdown"
+          output: "both"
+
+      # .NET Coverage PR Comment Report
+      - name: .NET Coverage PR Comment Report
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          hide_and_recreate: true
+          path: code-coverage-results.md
+
+      # .NET Coverage GitHubActions Job Summary Report
+      - name: .NET Coverage GitHubActions Job Summary Report
+        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
+  # Publish NuGet Package to GitHub Repository
+  github-publish:
+    name: GitHub Publish
+    runs-on: ubuntu-latest
+    needs: build
+    if: inputs.github-publish
+    steps:
+      # GitHub Download NuGet Artifact [for GitHub Repository]
+      - name: GitHub Download NuGet Artifact [for GitHub Repository]
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget
+
+      # GitHub Publish NuGet Artifact [for GitHub Repository]
+      - name: GitHub Publish NuGet Artifact [for GitHub Repository]
+        run: dotnet nuget push packages/*.nupkg --skip-duplicate --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+  # Publish NuGet Package to NuGet.org Public Repository
+  nuget-publish:
+    name: NuGet.org Publish
+    runs-on: ubuntu-latest
+    needs: build
+    if: inputs.nuget-publish
+    steps:
+      # GitHub Download NuGet Artifact [for NuGet.org Repository]
+      - name: GitHub Download NuGet Artifact [for NuGet.org Repository]
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget
+
+      # GitHub Publish NuGet Artifact [for NuGet.org Repository]
+      - name: GitHub Publish NuGet Artifact [for NuGet.org Repository]
+        run: dotnet nuget push packages/*.nupkg --skip-duplicate --api-key ${{ secrets.NUGET_ORG_KEY }} --source nuget
