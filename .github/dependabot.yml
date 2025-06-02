@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      day: "monday"
+      time: "2:00"
+      interval: "weekly"
+    labels:
+      - "dev-tooling"
