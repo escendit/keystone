@@ -10,7 +10,7 @@ include-pre-releases: true
 categories:
   - title: "📚 Documentation"
     labels:
-      - "documentation"
+      - "area/documentation"
   - title: "🚀 New Features"
     labels:
       - "enhancement"
@@ -28,7 +28,7 @@ categories:
       - "dependencies"
   - title: "🧑🏼‍💻 Development Tooling"
     labels:
-      - "dev-tooling"
+      - "area/dev-tooling"
 version-resolver:
   major:
     labels:
@@ -47,10 +47,10 @@ template: |
 
   $CONTRIBUTORS
 autolabeler:
-  - label: "dev-tooling"
+  - label: "area/dev-tooling"
     files:
       - ".github/**/*"
-  - label: "documentation"
+  - label: "area/documentation"
     files:
       - "docs/**/*"
   - label: "maintenance"
