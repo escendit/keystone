@@ -9,11 +9,18 @@ on:
         type: boolean
         default: true
         description: Build a solution
+      # .NET Version to use
+      dotnet-version:
+        required: false
+        type: string
+        default: |
+          9.0.x
+        description: .NET Version to use (can use multiple)
       # Project
       project:
         required: true
         type: string
-        description: Path to a project (.csproj)
+        description: Path to a project (.csproj) or a solution (.sln, .slnx)
       # Test
       test:
         required: false
@@ -55,8 +62,7 @@ jobs:
       - name: .NET Setup
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            9.0.x
+          dotnet-version: ${{ inputs.dotnet-version }}
 
       # .NET Restore
       - name: .NET Restore
@@ -87,7 +93,7 @@ jobs:
             test-results/
             !test-results/**/coverage.cobertura.xml
 
-      # .NET Covergage Upload Results from Testing
+      # .NET Coverage Upload Results from Testing
       - name: .NET Coverage Upload
         if: inputs.test
         uses: actions/upload-artifact@v4
@@ -99,7 +105,7 @@ jobs:
       # .NET Pack
       - name: .NET Pack
         if: ${{ inputs.pack && github.event_name == 'release'  && github.ref_type == 'tag' || github.event.release.tag_name }}
-        run: dotnet pack --no-build --configuration Release --output packages/
+        run: dotnet pack ${{ inputs.project }} --no-build --configuration Release --output packages/
 
       # .NET Upload NuGet Artifact
       - name: .NET Upload NuGet Artifact
@@ -186,7 +192,7 @@ jobs:
     name: NuGet.org Publish
     runs-on: ubuntu-latest
     needs: build
-    if: inputs.nuget-publish
+    if: inputs.nuget-publish && secrets.NUGET_ORG_KEY
     steps:
       # GitHub Download NuGet Artifact [for NuGet.org Repository]
       - name: GitHub Download NuGet Artifact [for NuGet.org Repository]
