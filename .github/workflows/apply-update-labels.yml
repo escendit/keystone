@@ -1,0 +1,8 @@
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: "0 0 1 * *"
+
+jobs:
+  create-labels:
+    uses: escendit/keystone/.github/workflows/utility-update-labels.yml@main
