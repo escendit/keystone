@@ -15,6 +15,7 @@ jobs:
           {"name": "area/dev-tooling", "color": "002A68", "description": "Development Tooling"},
           {"name": "area/continuous-integration", "color": "00A4CC", "description": "Improvements or additions to Continuous Integration"},
           {"name": "area/continuous-delivery", "color": "FF6F3C", "description": "Improvements or additions to Continuous Delivery"},
+          {"name": "area/license", "color": "1E3A5F", "description": "Licenses and Legal"},
           {"name": "dependencies", "color": "9AF807", "description": "Dependency Updates"},          
           {"name": "dependencies/dotnet-sdk", "color": "512BD4", "description": ".NET SDK Updates"},
           {"name": "dependencies/nuget", "color": "512BD4", "description": "NuGet Updates"},
