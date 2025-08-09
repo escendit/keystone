@@ -13,7 +13,13 @@ jobs:
         [
           {"name": "area/documentation", "color": "0075ca", "description": "Improvements or additions to documentation"},
           {"name": "area/dev-tooling", "color": "002A68", "description": "Development Tooling"},
+          {"name": "area/continuous-integration", "color": "00A4CC", "description": "Improvements or additions to Continuous Integration"},
+          {"name": "area/continuous-delivery", "color": "FF6F3C", "description": "Improvements or additions to Continuous Delivery"},
           {"name": "dependencies", "color": "9AF807", "description": "Dependency Updates"},          
+          {"name": "dependencies/dotnet-sdk", "color": "512BD4", "description": ".NET SDK Updates"},
+          {"name": "dependencies/nuget", "color": "512BD4", "description": "NuGet Updates"},
+          {"name": "dependencies/containers", "color": "0DB7ED", "description": "Container Updates"},
+          {"name": "dependencies/github-actions", "color": "333333", "description": "GitHub Actions Updates"},
           {"name": "major", "color": "11EF57", "description": "Breaking Changes"},
           {"name": "minor", "color": "EAC462", "description": "New Features"},
           {"name": "patch", "color": "B01E00", "description": "Bugfixes"},
@@ -36,7 +42,22 @@ jobs:
             } catch (error) {
               // Check if the error is because the label already exists
               if (error.status === 422) {
-                console.log(`Label '${label.name}' already exists. Skipping.`);
+                console.log(`Label '${label.name}' already exists. Updating.`);
+                try {
+                                  await github.rest.issues.updateLabel({
+                      accept: 'application/vnd.github+json',
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label.name,
+                      description: label.description || '',
+                      color: label.color,
+                    });
+                }
+                catch (error) {
+                    console.log(`Label '${label.name}' couldn't be updated. Skipping.`);
+                }
+          
+                
               } else {
                 // Log other errors
                 console.error(`Error creating label '${label.name}': ${error}`);
