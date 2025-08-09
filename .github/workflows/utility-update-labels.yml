@@ -21,47 +21,47 @@ jobs:
           {"name": "dependencies/nuget", "color": "512BD4", "description": "NuGet Updates"},
           {"name": "dependencies/containers", "color": "0DB7ED", "description": "Container Updates"},
           {"name": "dependencies/github-actions", "color": "333333", "description": "GitHub Actions Updates"},
+          {"name": "maintenance", "color": "2E7D32", "description": "Upkeep and tech debt reduction"},
           {"name": "major", "color": "11EF57", "description": "Breaking Changes"},
           {"name": "minor", "color": "EAC462", "description": "New Features"},
           {"name": "patch", "color": "B01E00", "description": "Bugfixes"},
           {"name": "stale", "color": "712B19", "description": "It's been a while this has been active"}
         ]
     steps:
-    - uses: actions/github-script@v7
-      with:
-        script: |
-          const labels = JSON.parse(process.env.LABELS_JSON);
-          for (const label of labels) {
-            try {
-              await github.rest.issues.createLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: label.name,
-                description: label.description || '',
-                color: label.color
-              });
-            } catch (error) {
-              // Check if the error is because the label already exists
-              if (error.status === 422) {
-                console.log(`Label '${label.name}' already exists. Updating.`);
-                try {
-                                  await github.rest.issues.updateLabel({
-                      accept: 'application/vnd.github+json',
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      name: label.name,
-                      description: label.description || '',
-                      color: label.color,
-                    });
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = JSON.parse(process.env.LABELS_JSON);
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name,
+                  description: label.description || '',
+                  color: label.color
+                });
+              }
+              catch (error) {
+                if (error.status === 422) {
+                  console.log(`Label '${label.name}' already exists. Updating.`);
+                  try {
+                      await github.rest.issues.updateLabel({
+                        accept: 'application/vnd.github+json',
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: label.name,
+                        description: label.description || '',
+                        color: label.color,
+                      });
+                  }
+                  catch (error) {
+                      console.log(`Label '${label.name}' couldn't be updated. Skipping.`);
+                  }
                 }
-                catch (error) {
-                    console.log(`Label '${label.name}' couldn't be updated. Skipping.`);
+            else {
+                  // Log other errors
+                  console.error(`Error creating label '${label.name}': ${error}`);
                 }
-          
-                
-              } else {
-                // Log other errors
-                console.error(`Error creating label '${label.name}': ${error}`);
               }
             }
-          }
