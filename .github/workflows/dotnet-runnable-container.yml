@@ -167,7 +167,7 @@ jobs:
     steps:
       # .NET Test Download Artifact
       - name: .NET Test Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: test
 
@@ -190,7 +190,7 @@ jobs:
     steps:
       # .NET Coverage Download Artifact
       - name: .NET Coverage Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: coverage
 
