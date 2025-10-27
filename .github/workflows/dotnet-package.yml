@@ -86,7 +86,7 @@ jobs:
       # .NET Test Upload Test Results from Testing
       - name: .NET Test Upload
         if: inputs.test
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test
           path: |
@@ -96,7 +96,7 @@ jobs:
       # .NET Coverage Upload Results from Testing
       - name: .NET Coverage Upload
         if: inputs.test
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage
           path: |
@@ -109,7 +109,7 @@ jobs:
 
       # .NET Upload NuGet Artifact
       - name: .NET Upload NuGet Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ github.event_name == 'release'  && github.ref_type == 'tag' || github.event.release.tag_name }}
         with:
           name: nuget
