@@ -4,7 +4,7 @@ on:
   # Manually run the job
   workflow_dispatch:
   # Periodically run the job
-  # Every first day of the month at 1:00 UTC
+  # Every first day of the month at midnight UTC
   schedule:
     - cron: "0 0 1 * *"
 
