@@ -23,4 +23,3 @@ jobs:
   create-labels:
     name: "Update Labels"
     uses: escendit/keystone/.github/workflows/utility-update-labels.yml@main
-    secrets: inherit
