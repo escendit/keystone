@@ -35,13 +35,14 @@ concurrency:
 
 jobs:
   update_release_draft:
+    name: "Update Release"
     permissions:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: "Draft Release"
-        uses: release-drafter/release-drafter@v6.1.0
+        uses: release-drafter/release-drafter@v7
         with:
           prerelease: ${{ github.event.inputs.release-type != 'release' }}
           prerelease-identifier: ${{ github.event.inputs.identifier }}
