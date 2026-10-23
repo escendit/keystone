@@ -20,6 +20,7 @@ jobs:
           {"name": "area/feature", "color": "a2eeef", "description": "New feature or request"},
           {"name": "dependencies", "color": "9AF807", "description": "Dependency Updates"},          
           {"name": "dependencies/dotnet-sdk", "color": "512BD4", "description": ".NET SDK Updates"},
+          {"name": "dependencies/maven", "color": "C71A36", "description": "Maven dependency updates"},
           {"name": "dependencies/nuget", "color": "512BD4", "description": "NuGet Updates"},
           {"name": "dependencies/npmjs", "color": "CB3837", "description": "npm updates"},
           {"name": "dependencies/containers", "color": "0DB7ED", "description": "Container Updates"},
